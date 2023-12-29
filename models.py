@@ -156,7 +156,7 @@ class TideModel(keras.Model):
     self.cat_embs = []
     for cat_size in cat_sizes:
       self.cat_embs.append(
-          tf.keras.layers.Embedding(input_dim=cat_size, output_dim=cat_emb_size)
+              tf.keras.layers.Embedding(input_dim=cat_size, output_dim=cat_emb_size)
       )
     self.ts_embs = tf.keras.layers.Embedding(input_dim=num_ts, output_dim=16)
 
@@ -221,7 +221,7 @@ class TideModel(keras.Model):
   def train_step(self, past_data, future_features, ytrue, tsidx, optimizer):
     """One step of training."""
     with tf.GradientTape() as tape:
-      all_preds = self((past_data, future_features, tsidx), training=True)
+      all_preds = self.call((past_data, future_features, tsidx))
       loss = train_loss(ytrue, all_preds)
 
     grads = tape.gradient(loss, self.trainable_variables)
@@ -269,7 +269,7 @@ class TideModel(keras.Model):
       future_features = all_data[4:6]
       y_true = all_data[3]
       tsidx = all_data[-1]
-      all_preds = self((past_data, future_features, tsidx), training=False)
+      all_preds = self.call((past_data, future_features, tsidx))
       y_pred = all_preds
       y_pred = y_pred[:, 0 : y_true.shape[1]]
       id1 = indices[0]
@@ -351,6 +351,9 @@ def nrmse(y_pred, y_true):
   mse = np.square(y_pred - y_true)
   return np.sqrt(mse.mean()) / np.abs(y_true).mean()
 
+def mse(y_pred, y_true):
+    a = np.square(y_pred - y_true)
+    return a.mean()
 
 METRICS = {
     'mape': mape,
@@ -359,4 +362,5 @@ METRICS = {
     'nrmse': nrmse,
     'rmse': rmse,
     'mae': mae_loss,
+    'mse':mse
 }

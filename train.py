@@ -117,11 +117,11 @@ def training():
     tf.random.set_seed(FLAGS.random_seed)
     np.random.seed(FLAGS.random_seed)
 
-    gpus = tf.config.experimental.list_physical_devices('GPU')
-    # tf.config.experimental.set_visible_devices(gpus[FLAGS.gpu], 'GPU')
-    if gpus:
-        for gpu in gpus:
-            tf.config.experimental.set_memory_growth(gpu, True)
+    # gpus = tf.config.experimental.list_physical_devices('GPU')
+    # # tf.config.experimental.set_visible_devices(gpus[FLAGS.gpu], 'GPU')
+    # if gpus:
+    #     for gpu in gpus:
+    #         tf.config.experimental.set_memory_growth(gpu, True)
 
     experiment_id = _get_random_string(8)
     logging.info('Experiment id: %s', experiment_id)
@@ -212,9 +212,7 @@ def training():
             past_data = batch[:3]
             future_features = batch[4:6]
             tsidx = batch[-1]
-            loss = model.train_step(
-                past_data, future_features, batch[3], tsidx, optimizer
-            )
+            loss = model.train_step(past_data, future_features, batch[3], tsidx, optimizer)
             # Train metrics
             summary.update({'train/reg_loss': loss, 'train/loss': loss})
             if i % 100 == 0:
@@ -232,7 +230,7 @@ def training():
         )
         logging.info('Val Loss: %s', val_loss)
         logging.info('Test Loss: %s', test_loss)
-        tracked_loss = val_metrics['rmse']
+        tracked_loss = val_metrics['mae']
         if tracked_loss < best_loss and ep > FLAGS.min_num_epochs:
             best_loss = tracked_loss
             pat = 0
